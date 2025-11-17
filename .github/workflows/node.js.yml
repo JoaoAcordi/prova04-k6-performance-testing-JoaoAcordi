@@ -5,7 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  schedule:   
+  schedule:
     - cron: '0 12 * * *'
 
 jobs:
@@ -15,9 +15,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5.0.0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
       - name: Setup K6
         uses: grafana/setup-k6-action@v1.1.0
-      - name: Run local k6 test
-        uses: grafana/run-k6-action@v1.3.1
+
+      - name: Run k6 performance test
+        run: npm run test
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
         with:
-          path: src/tests
+          name: k6-test-reports
+          path: |
+            src/output/index.html
+            src/output/dashboard.html
+
+        if: always()
